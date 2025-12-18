@@ -143,3 +143,13 @@
   padding-left: 15px !important;
   padding-right: 15px !important;
 }
+
+/** Filmstrip style */
+.jc-fancy-imagebar.d-print-none {
+  /* 'auto' hides the scrollbar if images fit, shows it if they don't */
+  overflow-x: scroll;
+  /* smooth scrolling for a nicer feel on newer browsers */
+  scroll-behavior: smooth;
+  /* Optional: ensures images don't shrink if flexbox is used */
+  white-space: nowrap;
+}

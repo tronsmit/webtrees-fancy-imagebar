@@ -39,11 +39,15 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
     use ModuleGlobalTrait;
 
     // Module constants
-    public const CUSTOM_AUTHOR = 'JustCarmen';
-    public const CUSTOM_VERSION = '2.4.1';
-    public const GITHUB_REPO = 'webtrees-fancy-imagebar';
-    public const AUTHOR_WEBSITE = 'https://justcarmen.nl';
-    public const CUSTOM_SUPPORT_URL = self::AUTHOR_WEBSITE . '/modules-webtrees-2/fancy-imagebar/';
+    public const GITHUB_USER     = 'tronsmit';                // Used for URL construction
+    public const CUSTOM_AUTHOR   = 'JustCarmen / tronsmit';   // Used for Display Credit
+    public const CUSTOM_VERSION  = '2.4.1-filmstrip-1.0.0';
+    public const GITHUB_REPO     = 'webtrees-fancy-imagebar';
+    public const CUSTOM_BRANCH   = 'filmstrip';               // The branch where latest-version.txt lives
+    
+    // Links
+    public const AUTHOR_WEBSITE     = 'https://github.com/' . self::GITHUB_USER . '/' . self::GITHUB_REPO;
+    public const CUSTOM_SUPPORT_URL = 'https://github.com/' . self::GITHUB_USER . '/' . self::GITHUB_REPO . '/issues';
 
     // Image cache dir
     private const CACHE_DIR = Webtrees::DATA_DIR . 'fib-cache/';
@@ -115,7 +119,7 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
      */
     public function customModuleLatestVersionUrl(): string
     {
-        return 'https://raw.githubusercontent.com/' . self::CUSTOM_AUTHOR . '/' . self::GITHUB_REPO . '/main/latest-version.txt';
+        return 'https://raw.githubusercontent.com/' . self::GITHUB_USER . '/' . self::GITHUB_REPO . '/' . self::CUSTOM_BRANCH . '/latest-version.txt';
     }
 
     /**
@@ -285,7 +289,6 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
         $canvas_height_sm = 0.75 * $canvas_height;
 
         $url = $this->assetUrl('css/style.css');
-        $filmstripUrl = $this->assetUrl('css/filmstrip.css');
 
         return '
             <style>
@@ -305,7 +308,6 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
                 }
             }
             </style>
-            <link rel="stylesheet" href="' . e($filmstripUrl) . '">
             <link rel="stylesheet" href="' . e($url) . '">';
     }
 

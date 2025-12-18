@@ -1,0 +1,14 @@
+//.jc-fancy-imagebar.d-print-none{overflow-x:scroll}
+// src/sass/_filmstrip.scss
+.jc-fancy-imagebar {
+    &.d-print-none {
+        /* 'auto' hides the scrollbar if images fit, shows it if they don't */
+        overflow-x: scroll;
+        
+        /* smooth scrolling for a nicer feel on newer browsers */
+        scroll-behavior: smooth;
+        
+        /* Optional: ensures images don't shrink if flexbox is used */
+        white-space: nowrap; 
+    }
+}

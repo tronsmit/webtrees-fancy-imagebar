@@ -1,6 +1,14 @@
 #exclude files from export
-.gitattributes export-ignore
-.gitignore export-ignore
+.gitattributes      export-ignore
+.gitignore          export-ignore
+
+# Dev Tools (These ARE in your repo, but users don't need them)
+package.json        export-ignore
+package-lock.json   export-ignore
+webpack.mix.*       export-ignore
+
+# Source Files (Not needed in the release
+src/                export-ignore
 
 # Default behavior: Store as LF, checkout based on OS
 * text=auto
