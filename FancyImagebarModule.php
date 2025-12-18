@@ -285,6 +285,7 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
         $canvas_height_sm = 0.75 * $canvas_height;
 
         $url = $this->assetUrl('css/style.css');
+        $filmstripUrl = $this->assetUrl('css/filmstrip.css');
 
         return '
             <style>
@@ -304,6 +305,7 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
                 }
             }
             </style>
+            <link rel="stylesheet" href="' . e($filmstripUrl) . '">
             <link rel="stylesheet" href="' . e($url) . '">';
     }
 
@@ -359,6 +361,7 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
         $media_type      = $this->getPreference($tree->id() . '-media-type');
         $square_thumbs   = $this->getPreference($tree->id() . '-square-thumbs', '0');
         $canvas_height   = (int)$this->getPreference($tree->id() . '-canvas-height', '80');
+        $margin = 5; // hard coded for now, must obtain from tree-module-settings
 
         // strip out the default media directory from the folder path. It is not stored in the database
         $folder = str_replace($wt_media_folder, "", $this->getPreference($tree->id() . '-media-folder'));
@@ -397,7 +400,7 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
 
         // Get the thumbnail resources
         $resources = array();
-        $calculated_width = 0;
+        $calculated_width = $margin;
 
         foreach ($xrefs as $xref) {
 
@@ -457,7 +460,7 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
             $resources = array_merge(...array_fill(0, (int)ceil($num_thumbs/count($resources)), $resources));
         }
 
-        return $this->createFancyImagebar($resources, $canvas_width, $canvas_height);
+        return $this->createFancyImagebar($resources, $calculated_width, $canvas_height, $margin);
     }
 
     private function getMediaList(Tree $tree): Collection
@@ -502,25 +505,31 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
      *
      * @return string
      */
-    private function createFancyImagebar($source_images, $canvas_width, $canvas_height): string
+    private function createFancyImagebar($source_images, $canvas_width, $canvas_height, $delta): string
     {
         // create the FancyImagebar canvas to put the thumbs on
         $fancy_imagebar_canvas = imagecreatetruecolor((int) $canvas_width, (int) $canvas_height);
+        if ($delta > 0) {
+            // set $bg to white
+            $bg = imagecolorallocate($fancy_imagebar_canvas, 255, 255, 255);
+            // and fill the canvas with this colour
+            imagefill($fancy_imagebar_canvas, 0, 0, $bg);
+        }
 
         $fancy_map = [];
-        $pos = 0;
+        $pos = $delta;
         foreach ($source_images as $source) {
 
             $image  = $source['image'];
             $linked = $source['linked'];
 
             $x1  = $pos;
-            $x2  = $x1 + imagesx($image);
-            $pos = $pos + imagesx($image);
+            $x2  = $x1 + imagesx($image) - $delta;
+            $pos = $x2 + $delta;
 
             // copy the images (thumbnails) to the canvas
             // imagecopy (resource $dst_im , resource $src_im , int $dst_x , int $dst_y , int $src_x , int $src_y , int $src_w , int $src_h)
-            imagecopy($fancy_imagebar_canvas, $image, $x1, 0, 0, 0, imagesx($image), (int) $canvas_height);
+            imagecopy($fancy_imagebar_canvas, $image, $x1, $delta, $delta, (int) ($delta/2), imagesx($image) - $delta, (int) $canvas_height - 2*$delta);
 
             // prepare the map
             if ($linked !== null) {
@@ -528,9 +537,9 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
                 $fancy_map[] = [
                     'coords' => [
                         'x1' => $x1,
-                        'y1' => '0',
+                        'y1' => $delta,
                         'x2' => $x2,
-                        'y2' => $canvas_height
+                        'y2' => $canvas_height - $delta
                     ],
                     'title' => strip_tags($linked->fullName() . $lifespan),
                     'url'   => e($linked->url())
@@ -540,6 +549,7 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
 
         // Output
         ob_start();
+        // create the jpeg version of the image
         imagejpeg($fancy_imagebar_canvas);
         $fancy_imagebar = ob_get_clean();
 
@@ -604,6 +614,9 @@ class FancyImagebarModule extends AbstractModule implements ModuleCustomInterfac
 
         $thumb = ImageCreateTrueColor((int)$thumb_width, (int)$thumb_height);
         imagecopyresampled($thumb, $source_image, 0, 0, (int)$source_x, (int)$source_y, (int)$thumb_width, (int)$thumb_height, (int)$source_width, (int)$source_height);
+        // Create grayscale and then sepia colour the strip
+        imagefilter($thumb, IMG_FILTER_GRAYSCALE);
+        imagefilter($thumb, IMG_FILTER_COLORIZE, 30,15,0);
 
         imagedestroy($source_image);
 

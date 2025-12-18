@@ -50,9 +50,9 @@ use Fisharebest\Webtrees\View;
             var coords = $(this).attr('data-coords').split(', ');
             var new_coords = [];
             new_coords[0] = parseInt(coords[0]) * ratio;
-            new_coords[1] = parseInt(coords[1]);
+            new_coords[1] = parseInt(coords[1]) * ratio;
             new_coords[2] = parseInt(coords[2]) * ratio;
-            new_coords[3] = parseInt(coords[3]);
+            new_coords[3] = parseInt(coords[3]) * ratio;
             $(this).attr("coords", new_coords.join(', '));
         });
     }
